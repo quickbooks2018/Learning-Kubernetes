@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nginx
+  labels:
+    name: pvc-nginx
+spec:
+  # Don't use any storage-class
+  storageClassName: ""
+  # Use a pre-existing PV 
+  selector:
+    matchLabels:
+      name: "pv-hostpath"
+  accessModes:
+    # Though accessmode is already defined in pv definition. It is still needed here.
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Mi
+

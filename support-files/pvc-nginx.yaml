@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nginx
+  labels:
+    name: pvc-nginx
+spec:
+  # If you are using dynamic provisioning, it is important to specify a storageClassName.
+  storageClassName: "standard"
+  # If you are not using storage classes, then it is imporant to use a selector, which will select the PV to bind to.
+  #selector:
+   # matchLabels:
+    #  name: pv-nginx
+  accessModes:
+    # Though accessmode is already defined in pv definition. It is still needed here.
+    # - ReadWriteMany
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+
