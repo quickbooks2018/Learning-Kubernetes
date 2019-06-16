@@ -1,0 +1,689 @@
+https://kubernetes.io/docs/home/
+
+1.  kubectl get nodes
+2.  kubectl get pods
+3.  kubectl get deployments
+4.  kubectl delete deployment nginx
+
+Example: kubectl run nginx --image=nginx:alpine --port 80
+         kubectl get pods --watch
+
+5. -o wide ---> in which nodes it is running
+
+6.  kubectl get pods --all-namespaces
+
+7.  kubectl get pods --all-namespaces -o wide
+
+8.  kubectl get pods -o wide
+
+9.  kubectl scale deployment nginx --replicas=4
+
+10. kubectl expose deployment nginx --type=LoadBalancer
+
+11. kubectl get cs ---> ( COMPONENT STATUS) This will show cluster Health  ---> kubectl version --short
+
+12. kubectl run saqlain --image=nginx:alpine --port 80
+
+13. kubectl expose deployment saqlain --type=NodePort
+
+14. kubectl get services OR kubectl get svc
+
+15. kubectl config view
+
+16. kubectl cluster-info
+
+17. kubectl config get-contexts
+
+18. kubectl config get-clusters
+
+19. kubectl config use-context CLUSTERNAME                           ---> from multiple cluster, select one to make it active.
+
+20. kubectl get nodes -o wide   ---> -o wide ---> always give more info
+
+21. kubectl describe node1
+
+###Example####
+
+kubectl run nginx --image=nginx:alpine  ---> Use create instead of run ----> because it is depricated.
+
+kubectl get deployments
+
+
+NAME    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx   1         1         1            1           69s
+
+# Note ---> In deployment ----> 1 Pod is running which name is nginx
+
+# Desired mean ---> One replica was desired
+
+kubectl get pods
+
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-64d9675947-lbxmq   1/1     Running   0          3m8s
+
+
+kubectl get all
+
+
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/nginx-64d9675947-lbxmq   1/1     Running   0          5m32s
+
+pod/nginx-64d9675947-lbxmq
+PODID--->    deployment-replica-set-random-number
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.100.0.1   <none>        443/TCP   6h27m
+
+NAME                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/nginx   1         1         1            1           5m32s
+
+NAME                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/nginx-64d9675947   1         1         1       5m32s
+
+kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.100.0.1   <none>        443/TCP   6h32m
+
+For Example: IF There is pod network controller or any DNS service ---> they want to talk to kubernetes, they will talk via this internal Service.
+
+
+###Name Spaces###
+
+Name Spaces are virtual isolated environments.
+
+###kubectl get namespaces###
+
+NAME          STATUS   AGE
+default       Active   6h40m   ---> the work you perform is stored here.
+kube-public   Active   6h40m   ---> include cluster access details like IP or DNS etc---> not password or keys
+kube-system   Active   6h40m   ---> In this namespace kubernets internal components runs
+
+###kubectl get pods --namespace=kube-system###
+
+kubectl get pods --namespace=kube-system
+NAME                                    READY   STATUS    RESTARTS   AGE
+aws-node-bgkt7                          1/1     Running   0          5h15m
+aws-node-jn49n                          1/1     Running   0          5h15m
+coredns-854dc8b5d4-5h7jm                1/1     Running   0          6h44m
+coredns-854dc8b5d4-cc9l6                1/1     Running   0          6h44m
+heapster-684777c4cb-4lvjx               1/1     Running   0          5h13m
+kube-proxy-7gldl                        1/1     Running   0          5h15m
+kube-proxy-hrg2f                        1/1     Running   0          5h15m
+kubernetes-dashboard-65c76f6c97-gkxm9   1/1     Running   0          5h13m
+monitoring-influxdb-5c5bf4949d-55cb2    1/1     Running   0          5h13m
+
+kubectl get pods --namespace=public
+No resources found.
+
+kubectl get pods --namespace=default
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-64d9675947-lbxmq   1/1     Running   0          23m
+
+
+###kubectl describe deployment nginx###
+
+Name:                   nginx
+Namespace:              default
+CreationTimestamp:      Thu, 23 May 2019 04:52:22 +0000
+Labels:                 run=nginx
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               run=nginx
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  run=nginx
+  Containers:
+   nginx:
+    Image:        nginx:alpine
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   nginx-64d9675947 (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  26m   deployment-controller  Scaled up replica set nginx-64d9675947 to 1
+
+
+###kubectl describe pod nginx###
+
+Name:               nginx-64d9675947-lbxmq
+Namespace:          default
+Priority:           0
+PriorityClassName:  <none>
+Node:               ip-192-168-88-163.us-west-2.compute.internal/192.168.88.163
+Start Time:         Thu, 23 May 2019 04:52:22 +0000
+Labels:             pod-template-hash=64d9675947
+                    run=nginx
+Annotations:        <none>
+Status:             Running
+IP:                 192.168.108.132
+Controlled By:      ReplicaSet/nginx-64d9675947
+Containers:
+  nginx:
+    Container ID:   docker://4b17ce7ee68ae9ca5b4e245f6b940b62b1491d0bb40fe98b578ea82ff52093d7
+    Image:          nginx:alpine
+    Image ID:       docker-pullable://nginx@sha256:57a226fb6ab6823027c0704a9346a890ffb0cacde06bc19bbc234c8720673555
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Thu, 23 May 2019 04:52:26 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-6vfn9 (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  default-token-6vfn9:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-6vfn9
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type    Reason     Age   From                                                   Message
+  ----    ------     ----  ----                                                   -------
+  Normal  Scheduled  28m   default-scheduler                                      Successfully assigned default/nginx-64d9675947-lbxmq to ip-192-168-88-163.us-west-2.compute.internal
+  Normal  Pulling    28m   kubelet, ip-192-168-88-163.us-west-2.compute.internal  pulling image "nginx:alpine"
+  Normal  Pulled     28m   kubelet, ip-192-168-88-163.us-west-2.compute.internal  Successfully pulled image "nginx:alpine"
+  Normal  Created    28m   kubelet, ip-192-168-88-163.us-west-2.compute.internal  Created container
+  Normal  Started    28m   kubelet, ip-192-168-88-163.us-west-2.compute.internal  Started container
+
+
+####Very Important Trick, to write the YAML files#####
+
+### kubectl get pods ###
+
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-64d9675947-lbxmq   1/1     Running   0          39m
+
+
+
+### kubectl get pods nginx-64d9675947-lbxmq -o yaml ###
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: 2019-05-23T04:52:22Z
+  generateName: nginx-64d9675947-
+  labels:
+    pod-template-hash: 64d9675947
+    run: nginx
+  name: nginx-64d9675947-lbxmq
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: nginx-64d9675947
+    uid: 8d4063db-7d16-11e9-8f1a-0255d63cef02
+  resourceVersion: "31652"
+  selfLink: /api/v1/namespaces/default/pods/nginx-64d9675947-lbxmq
+  uid: 8d421b4f-7d16-11e9-8f1a-0255d63cef02
+spec:
+  containers:
+  - image: nginx:alpine
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-6vfn9
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  nodeName: ip-192-168-88-163.us-west-2.compute.internal
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: default-token-6vfn9
+    secret:
+      defaultMode: 420
+      secretName: default-token-6vfn9
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: 2019-05-23T04:52:22Z
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: 2019-05-23T04:52:26Z
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: 2019-05-23T04:52:26Z
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: 2019-05-23T04:52:22Z
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://4b17ce7ee68ae9ca5b4e245f6b940b62b1491d0bb40fe98b578ea82ff52093d7
+    image: nginx:alpine
+    imageID: docker-pullable://nginx@sha256:57a226fb6ab6823027c0704a9346a890ffb0cacde06bc19bbc234c8720673555
+    lastState: {}
+    name: nginx
+    ready: true
+    restartCount: 0
+    state:
+      running:
+        startedAt: 2019-05-23T04:52:26Z
+  hostIP: 192.168.88.163
+  phase: Running
+  podIP: 192.168.108.132
+  qosClass: BestEffort
+  startTime: 2019-05-23T04:52:22Z
+
+###  kubectl get pods nginx-64d9675947-lbxmq -o yaml > test.yaml ###
+
+
+### kubectl get services ###
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.100.0.1   <none>        443/TCP   7h16m
+
+#Note: If you delete this service, it will be recreated, because such a important service, Kubernetes configured it, in such a way.
+
+kubectl delete service kubernetes
+service "kubernetes" deleted
+
+# kubectl get services #
+No resources found.
+
+# kubectl get services #
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.100.0.1   <none>        443/TCP   0s
+
+### The other very important point is deleting the complete set ---> deployments is via yaml file.
+
+kubectl delete -f nginx.yml
+
+#Note If you want to simply create a pod, you can but it will not recreated in case of failier, because it has no CONTOLLER, ---> (deployments)
+
+### You can also use CREATE instead of apply ###
+
+kubectl create -f nginx.yml
+
+### TO ACCESS A CONTAINER ###
+
+Example:
+
+-----------------> kubectl run nginx --image:nginx:alpine
+
+kubectl get pods -o wide
+
+NAME                          READY   STATUS    RESTARTS   AGE    IP               NODE                                           NOMINATED NODE
+asim-nginx-74596c7bff-z6gwk   1/1     Running   0          2m5s   192.168.166.92   ip-192-168-164-68.us-west-2.compute.internal   <none>
+
+-------------------> kubectl run multitool --image=praqma/network-multitool
+
+kubectl get pods -o wide
+
+NAME                          READY   STATUS    RESTARTS   AGE     IP                NODE                                           NOMINATED NODE
+asim-nginx-74596c7bff-z6gwk   1/1     Running   0          7m10s   192.168.166.92    ip-192-168-164-68.us-west-2.compute.internal   <none>
+multitool-5fc65f7947-mvjvk    1/1     Running   0          110s    192.168.108.132   ip-192-168-88-163.us-west-2.compute.internal   <none>
+
+-------------------->  kubectl exec -it multitool-5fc65f7947-mvjvk /bin/bash
+
+curl asim-nginx-74596c7bff-z6gwk 
+
+ping 192.168.166.92 
+
+https://github.com/praqma/network-multitool
+
+###LOGS###
+
+kubectl logs asim-nginx-74596c7bff-z6gwk
+
+192.168.108.132 - - [23/May/2019:07:49:40 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.61.1" "-"
+
+kubectl logs -f asim-nginx-74596c7bff-z6gwk
+
+#This command of logs only works for PODS, in order to see the logs of deployments and service there are other commands.#
+
+
+# IN ORDER FOR SERVICE DISCOVERY, we need to expose the deployments, so we can access the deployments or pods with there name.
+
+
+ kubectl expose deployment nginx --type=ClusterIP --port 80
+
+ kubectl get services -o wide
+
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE     SELECTOR
+asim-nginx   ClusterIP   10.100.60.152   <none>        80/TCP    117s    run=asim-nginx
+kubernetes   ClusterIP   10.100.0.1      <none>        443/TCP   5h52m   <none>
+
+now,
+
+kubectl exec -it multitool-5fc65f7947-mvjvk /bin/bash
+
+curl asim-nginx ---> will work, because it service is available.
+
+dig asim-nginx.default.svc.cluster.local
+
+ <<>> DiG 9.12.3 <<>> asim-nginx.default.svc.cluster.local
+;; global options: +cmd
+;; Got answer:
+;; WARNING: .local is reserved for Multicast DNS
+;; You are currently testing what happens when an mDNS query is leaked to DNS
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 27984
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: 6ab926ecab18ca66 (echoed)
+;; QUESTION SECTION:
+;asim-nginx.default.svc.cluster.local. IN A
+
+;; ANSWER SECTION:
+asim-nginx.default.svc.cluster.local. 5 IN A    10.100.60.152 ---> This is service IP not a POD IP, POD IP ---> 192.168.166.92
+
+;; Query time: 0 msec
+;; SERVER: 10.100.0.10#53(10.100.0.10)
+;; WHEN: Thu May 23 11:48:18 UTC 2019
+;; MSG SIZE  rcvd: 129
+
+kubectl describe service asim-nginx
+
+Name:              asim-nginx
+Namespace:         default
+Labels:            run=asim-nginx
+Annotations:       <none>
+Selector:          run=asim-nginx
+Type:              ClusterIP
+IP:                10.100.60.152
+Port:              <unset>  80/TCP
+TargetPort:        80/TCP
+Endpoints:         192.168.166.92:80   ---> EndPoint mean POD IP
+Session Affinity:  None
+Events:            <none>
+
+### To Access the service externally, we can ex
+kubectl expose deployment asim-nginx --type=NodePort --port 80
+
+### The Other type of Controller is LoadBalancer is only available with Cloud Providers, like AWS, GOOGLE AZURE ###
+
+### Services can be of 3 Types ###
+
+1. ClusterIP
+2. NodePort
+3. LoadBalancer ---> in your local-setup MetalLB  ---> NEW Kubernetes project, it creates a virtual load balancer, in your cluster, than you create services as type LoadBalancer.
+   (other solution is spun a virtual machine, and on that run any Ingress Controller)
+
+
+
+### Multi-Container POD ###
+
+kubectl describe pod <podname> ---> see the names of containers running in this POD.
+
+OR
+
+kubectl get pods multi-container-demo -n default -o jsonpath='{.spec.containers[*].name}*' ---> List of containers name in POD
+
+kubectl get pods <podname> --namespace default -o jsonpath='{.spec.containers[*].name}*' ---> List of containers name in POD
+
+kubectl exec -it <podname> /bin/sh ---> This will land in default container.
+
+kubectl exec -it <podname> -c nginx /bin/sh
+
+kubectl exec -it <podname> -c content-generator /bin/sh
+
+### Multi-Container-logs ###
+
+ kubectl logs multi-container-demo -c nginx
+
+ kubectl logs -f multi-container-demo -c nginx 
+
+ kubectl logs multi-container-demo -c 
+
+### Persistent Storage ###
+
+kubectl get persistentVolumes
+
+kubectl get sc ---> Storage Class
+
+NAME            PROVISIONER             AGE
+gp2 (default)   kubernetes.io/aws-ebs   2d3h
+standard        kubernetes.io/aws-ebs   16h
+
+kubectl get pv ---> Persistent Volume
+
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                     STORAGECLASS   REASON   AGE
+pvc-e11164c6-7e0b-11e9-9678-0afb77bd0890   20Gi       RWO            Delete           Bound    default/jenkins-storage   standard                16h
+                                                                  --->Note: if Retain you can not delete volume, unless pod is deleted.                           
+
+kubectl get pvc ---> Persistent Volume Claim
+
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+jenkins-storage   Bound    pvc-e11164c6-7e0b-11e9-9678-0afb77bd0890   20Gi       RWO            standard       16h
+
+### In Order to Delete the PVC ---> "Persisstent Volume Claim" ###
+
+kubectl get pvc
+
+kubectl delete pvc jenkins-storage
+
+Note: ---> Make sure to remove ---> deployments (if any) remove pod (if any)
+
+# Resize the PVC 
+
+https://www.jeffgeerling.com/blog/2019/expanding-k8s-pvs-eks-on-aws
+
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: standard
+  annotations:
+    storageclass.beta.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+reclaimPolicy: Delete
+allowVolumeExpansion: true  ---> add this line
+mountOptions:
+  - debug
+
+Edit your PVC
+
+Increase the storage request of your PVC (note that you cannot decrease the request... that's a lot weirder a use case and is not something trivial to do on most storage systems!) by editing the pvc:
+$ kubectl edit pvc -n [namespace] [claim-name]
+...
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi # increased from 10Gi
+  storageClassName: standard
+
+Save the edit, then wait, and monitor the PV associated with the PVC:
+$ kubectl get pv pvc-d2adc816-d0c7-11e8-80aa-0ef7083fecf8 --watch
+
+
+# Kubernetes Secrets
+https://github.com/quickbooks2018/kubernetes-katas/blob/master/07-secrets-configmaps.md
+
+Generate self signed certs: (check support-files/ directory)
+
+#!/bin/bash
+# This script generates SSL certs (.crt and .key) to be used with nginx.
+# The files are generated in .PEM format.
+
+echo "Generating self signed certificate ..."
+openssl req \
+  -x509 -newkey rsa:2048 -nodes -days 365 \
+  -keyout tls.key -out tls.crt -subj '/CN=*.example.com'
+
+echo "...Done."
+
+#echo "Creating a combined PEM file out of the two certificate files ... (in case you need it later)"
+#cat tls.crt tls.key > tls-cert-plus-key.pem
+#echo
+echo "Here are the generated certificate files:"
+ls -1 tls.*
+
+
+########################################################
+./generate-self-signed-certs.sh
+########################################################
+
+
+
+This will create tls.* files.
+
+Create (tls type) secret for nginx:
+
+kubectl create secret tls nginx-certs --cert=tls.crt --key=tls.key
+
+
+kubectl get secrets
+
+
+kubectl describe secret nginx-certs
+
+kubectl get secret nginx-certs
+
+kubectl get secret nginx-certs -o yaml
+
+
+---> Create a configuration file for NGINX for eg. nginx-connectors.conf
+
+nano nginx-connectors.conf
+
+server {
+    listen       80;
+    server_name  localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+}
+
+server {
+    listen       443;
+    server_name  localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    ssl on;
+    ssl_certificate /certs/tls.crt;
+    ssl_certificate_key /certs/tls.key;
+}
+
+
+ kubectl create configmap nginx-config --from-file=/home/cloud_user/nginx-connectors.conf
+
+
+ kubectl get configmap
+
+
+ kubectl get configmap nginx-config -o yaml
+
+
+ kubectl describe configmap nginx-config
+
+
+ kubectl get configmaps,secrets
+
+
+ Create a nginx deployment with SSL support using the secret and config map you created in the previous steps (above): (check support-files/ directory)
+
+kubectl create -f nginx-ssl.yaml 
+
+nano nginx-ssl.yaml 
+
+
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      volumes:
+      - name: certs-volume
+        secret:
+          secretName: nginx-certs
+      - name: config-volume
+        configMap:
+          name: nginx-config
+      containers:
+      - name: nginx
+        image: nginx:1.15.1
+        ports:
+        - containerPort: 443
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /certs
+          name: certs-volume
+        - mountPath: /etc/nginx/conf.d
+          name: config-volume 
+
+
+
+
+#Note: Create a yaml file for deployment or use a ---> command  "expose" a deplpyment
+
+ kubectl get pods -o wide
+
+ kubectl exec -it nginx-6467747556-wx6r7 -- /bin/sh
+
+ ctrl+d
+
+ kubectl exex -it somecontainer -- /bin/bash
+ 
+ curl -k https://localIP
+
+
+
+
+
+
