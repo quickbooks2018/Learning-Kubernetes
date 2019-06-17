@@ -70,6 +70,25 @@ kubectl get nodes
 
 #####################RUN ON MASTER ONLY###################
 
+### Note Scroll copy the token & paste on all worker nodes to join the cluster, just like in docker-swarm ###
+
+
+### TEST ###
+
+#Create and scale a deployment using kubectl.
+
+#Create a simple deployment.
+kubectl create deployment nginx --image=nginx
+
+#Inspect the pod.
+kubectl get pods
+
+#Scale the deployment.
+kubectl scale deployment nginx --replicas=4
+
+#nspect the pods. You should now have 4.
+kubectl get pods
+
 
 #####################RUN ON WORKER NODES ONLY###################
 #!/bin/bash
