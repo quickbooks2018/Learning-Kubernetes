@@ -89,6 +89,7 @@ kubectl scale deployment nginx --replicas=4
 #nspect the pods. You should now have 4.
 kubectl get pods
 
+kubectl expose deployment nginx --type=NodePort --port=80
 
 #####################RUN ON WORKER NODES ONLY###################
 #!/bin/bash
