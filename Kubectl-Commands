@@ -678,7 +678,7 @@ spec:
 
  ctrl+d
 
- kubectl exex -it somecontainer -- /bin/bash
+ kubectl exec -it somecontainer -- /bin/bash
  
  curl -k https://localIP
 
