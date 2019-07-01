@@ -1,0 +1,33 @@
+#!/bin/bash
+
+
+#Use the following commands to create a variable and get the latest version of kubeadm
+export VERSION=v1.13.5
+export ARCH=amd64
+curl -sSL https://dl.k8s.io/release/${VERSION}/bin/linux/${ARCH}/kubeadm > kubeadm
+
+#Run the following commands to install kubeadm and verify the version:
+sudo install -o root -g root -m 0755 ./kubeadm /usr/bin/kubeadm
+sudo kubeadm version
+
+
+#Use the following command to plan the upgrade
+sudo kubeadm upgrade plan
+
+
+#Use this command to apply the upgrade (also in the output of upgrade plan):
+sudo kubeadm upgrade apply v1.13.5
+
+#Use the following commands to get the latest version of kubelet on each node:
+export VERSION=v1.13.5
+export ARCH=amd64
+curl -sSL https://dl.k8s.io/release/${VERSION}/bin/linux/${ARCH}/kubelet > kubelet
+
+#Use these commands to install kubelet and restart the kubelet service:
+sudo install -o root -g root -m 0755 ./kubelet /usr/bin/kubelet
+sudo systemctl restart kubelet.service
+
+
+
+#END
+
