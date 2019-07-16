@@ -683,6 +683,12 @@ spec:
  curl -k https://localIP
 
 
+# Testing Pods
+
+kubectl run busybox --image=busybox --rm -it --restart=Never -- sh
+
+---> Testing POD ---> wget -qO- 10.244.2.2
+
 
 
 
