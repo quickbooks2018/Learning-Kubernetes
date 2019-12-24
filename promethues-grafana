@@ -63,9 +63,15 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system
 
-# Create kube-config.yml
+# END
 
-cat << EOF > kube-config.yml
+### Do This part Manually ###
+
+# 1. Create kube-config.yml:
+vi kube-config.yml
+
+Add the following to kube-config.yml:
+
 apiVersion: kubeadm.k8s.io/v1alpha1
 kind:
 kubernetesVersion: "v1.11.3"
@@ -73,28 +79,21 @@ networking:
   podSubnet: 10.244.0.0/16
 apiServerExtraArgs:
   service-node-port-range: 8000-31274
-  EOF
   
-  # Initialize Kubernetes
-  
-  kubeadm init --config kube-config.yml
-  
-  # Copy admin.conf to your home directory
-  
-  mkdir -p $HOME/.kube
+# 2. Initialize Kubernetes
+kubeadm init --config kube-config.yml
+
+# 3. Copy admin.conf to your home directory
+mkdir -p $HOME/.kube
+# 4. Copy 
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
-
-# Install flannel
-
+# 5. Install flannel
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml
-
-# Patch flannel
-
-cat << EOF >> /etc/kubernetes/manifests/kube-controller-manager.yaml
+Patch flannel
+vim /etc/kubernetes/manifests/kube-controller-manager.yaml
+Add the following to kube-controller-manager.yaml:
 --allocate-node-cidrs=true
 --cluster-cidr=10.244.0.0/16
-  EOF
-
-# Then reolad kubelete
+# 6. Reolad kubelete
 systemctl restart kubelet
