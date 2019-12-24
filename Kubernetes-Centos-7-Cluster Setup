@@ -1,6 +1,16 @@
 #####################RUN ON MASTER ONLY###################
 #!/bin/bash
 
+
+#Disable swap
+swapoff -a
+cp /etc/fstab /etc/fstab.backup
+# Comment /etc/fstab
+# https://unix.stackexchange.com/questions/295537/how-do-i-comment-lines-in-fstab-using-sed
+# https://stackoverflow.com/questions/8488253/how-to-force-cp-to-overwrite-without-confirmation/38649556
+awk '/[/]swap/{$0="#"$0} 1' /etc/fstab >/etc/fstab.tmp && yes | mv /etc/fstab.tmp /etc/fstab 2>&1 > /dev/null
+
+
 #Install Docker and Kubernetes on all servers.
 #keyboard_arrow_up
 #The first thing that we are going to do is use SSH to log in to all machines. Once we have logged in, we need to elevate privileges using sudo
