@@ -1,0 +1,100 @@
+#####################RUN ON MASTER ONLY###################
+#!/bin/bash
+
+
+# Disable swap
+swapoff -a
+cp /etc/fstab /etc/fstab.backup
+
+
+# Comment /etc/fstab
+# https://unix.stackexchange.com/questions/295537/how-do-i-comment-lines-in-fstab-using-sed
+# https://stackoverflow.com/questions/8488253/how-to-force-cp-to-overwrite-without-confirmation/38649556
+awk '/[/]swap/{$0="#"$0} 1' /etc/fstab >/etc/fstab.tmp && yes | mv /etc/fstab.tmp /etc/fstab 2>&1 > /dev/null
+
+
+### Install Docker and Kubernetes on all servers ###
+
+
+#Disable SELinux.
+setenforce 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+#Enable the br_netfilter module for cluster communication.
+
+modprobe br_netfilter
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+# Ensure that the Docker dependencies are satisfied.
+
+yum install -y yum-utils device-mapper-persistent-data lvm2
+
+# Add the Docker repo and install Docker.
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum install -y docker-ce
+
+#Set the cgroup driver for Docker to systemd, then reload systemd, enable and start Docker
+sed -i '/^ExecStart/ s/$/ --exec-opt native.cgroupdriver=systemd/' /usr/lib/systemd/system/docker.service
+systemctl daemon-reload
+systemctl enable docker --now
+
+# Add the repo for Kubernetes.
+cat << EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+# Install Kubernetes 1.11.3
+yum install -y kubelet-1.11.3 kubeadm-1.11.3 kubectl-1.11.3 kubernetes-cni-0.6.0 --disableexcludes=kubernetes
+
+# Start and enable the Kubernetes service
+systemctl start kubelet && systemctl enable kubelet
+
+# Create the k8s.conf file
+cat << EOF >  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system
+
+# Create kube-config.yml
+
+cat << EOF > kube-config.yml
+apiVersion: kubeadm.k8s.io/v1alpha1
+kind:
+kubernetesVersion: "v1.11.3"
+networking:
+  podSubnet: 10.244.0.0/16
+apiServerExtraArgs:
+  service-node-port-range: 8000-31274
+  EOF
+  
+  # Initialize Kubernetes
+  
+  kubeadm init --config kube-config.yml
+  
+  # Copy admin.conf to your home directory
+  
+  mkdir -p $HOME/.kube
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
+
+# Install flannel
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml
+
+# Patch flannel
+
+cat << EOF >> /etc/kubernetes/manifests/kube-controller-manager.yaml
+--allocate-node-cidrs=true
+--cluster-cidr=10.244.0.0/16
+  EOF
+
+# Then reolad kubelete
+systemctl restart kubelet
