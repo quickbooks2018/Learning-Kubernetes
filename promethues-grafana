@@ -68,7 +68,7 @@ sysctl --system
 ### Do This part Manually ###
 
 # 1. Create kube-config.yml:
-vi kube-config.yml
+vim kube-config.yml
 
 Add the following to kube-config.yml:
 
