@@ -1,0 +1,173 @@
+#####################RUN ON MASTER ONLY###################
+#!/bin/bash
+
+
+#Disable swap
+swapoff -a
+cp /etc/fstab /etc/fstab.backup
+# Comment /etc/fstab
+# https://unix.stackexchange.com/questions/295537/how-do-i-comment-lines-in-fstab-using-sed
+# https://stackoverflow.com/questions/8488253/how-to-force-cp-to-overwrite-without-confirmation/38649556
+awk '/[/]swap/{$0="#"$0} 1' /etc/fstab >/etc/fstab.tmp && yes | mv /etc/fstab.tmp /etc/fstab 2>&1 > /dev/null
+
+
+#Install Docker and Kubernetes on all servers.
+#keyboard_arrow_up
+#The first thing that we are going to do is use SSH to log in to all machines. Once we have logged in, we need to elevate privileges using sudo
+
+#Disable SELinux.
+setenforce 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+#Enable the br_netfilter module for cluster communication.
+
+modprobe br_netfilter
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+#Ensure that the Docker dependencies are satisfied.
+
+yum install -y yum-utils device-mapper-persistent-data lvm2
+
+#Add the Docker repo and install Docker.
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum install -y docker-ce
+
+#Set the cgroup driver for Docker to systemd, then reload systemd, enable and start Docker
+sed -i '/^ExecStart/ s/$/ --exec-opt native.cgroupdriver=systemd/' /usr/lib/systemd/system/docker.service
+systemctl daemon-reload
+systemctl enable docker --now
+
+#Add the repo for Kubernetes.
+cat << EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+#Install Kubernetes.
+yum install -y kubelet kubeadm kubectl 
+
+#Enable Bridging
+
+#Create the k8s.conf file:
+cat << EOF >  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system
+
+
+#Enable the kubelet service. The kubelet service will fail to start until the cluster is initialized, this is expected.
+systemctl start kubelet && systemctl enable kubelet
+
+#*Note: Complete the following section on the MASTER ONLY!
+#Initialize the cluster using the IP range for Flannel.
+kubeadm init --pod-network-cidr=10.244.0.0/16
+
+#Copy the kubeadmn join command that is in the output. We will need this later.
+
+#Exit sudo and copy the admin.conf to your home directory and take ownership.
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+#Deploy Flannel.
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+
+# END
+
+
+
+
+
+
+
+
+#Check the cluster state.
+
+kubectl get pods --all-namespaces
+
+kubectl get nodes
+
+
+
+#####################RUN ON MASTER ONLY###################
+
+### Note Scroll copy the token & paste on all worker nodes to join the cluster, just like in docker-swarm ###
+
+
+### TEST ###
+
+#Create and scale a deployment using kubectl.
+
+#Create a simple deployment.
+kubectl create deployment nginx --image=nginx
+
+#Inspect the pod.
+kubectl get pods
+
+#Scale the deployment.
+kubectl scale deployment nginx --replicas=4
+
+#nspect the pods. You should now have 4.
+kubectl get pods
+
+kubectl expose deployment nginx --type=NodePort --port=80
+
+#####################RUN ON WORKER NODES ONLY###################
+#!/bin/bash
+
+#Install Docker and Kubernetes on all servers.
+#keyboard_arrow_up
+#The first thing that we are going to do is use SSH to log in to all machines. Once we have logged in, we need to elevate privileges using sudo
+
+#Disable SELinux.
+setenforce 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+#Enable the br_netfilter module for cluster communication.
+
+modprobe br_netfilter
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+#Ensure that the Docker dependencies are satisfied.
+
+yum install -y yum-utils device-mapper-persistent-data lvm2
+
+#Add the Docker repo and install Docker.
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum install -y docker-ce
+
+#Set the cgroup driver for Docker to systemd, then reload systemd, enable and start Docker
+sed -i '/^ExecStart/ s/$/ --exec-opt native.cgroupdriver=systemd/' /usr/lib/systemd/system/docker.service
+systemctl daemon-reload
+systemctl enable docker --now
+
+#Add the repo for Kubernetes.
+cat << EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+#Install Kubernetes.
+yum install -y kubelet kubeadm kubectl
+
+
+#Enable the kubelet service. The kubelet service will fail to start until the cluster is initialized, this is expected.
+systemctl enable kubelet
+
+#####################RUN ON WORKER NODES ONLY###################
