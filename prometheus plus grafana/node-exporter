@@ -11,7 +11,7 @@ chown prometheus:prometheus node_exporter
 
 
 #Create a SERVICE /etc/systemd/system/node_exporter.service:
-cat << EOF >  /etc/sysctl.d/node_exporter.service
+cat << EOF >  /etc/systemd/system/node_exporter.service
 [Unit]
 Description=Node Exporter
 
