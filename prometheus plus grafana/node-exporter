@@ -35,11 +35,14 @@ systemctl start node_exporter.service
 
 
 
-
-
-
-
-
-
-
 #END
+
+
+
+
+# Container CPU load average:
+container_cpu_load_average_10s
+
+
+# Memory usage query:
+((sum(node_memory_MemTotal_bytes) - sum(node_memory_MemFree_bytes) - sum(node_memory_Buffers_bytes) - sum(node_memory_Cached_bytes)) / sum(node_memory_MemTotal_bytes)) * 100
