@@ -1,6 +1,7 @@
 
 #  1. Initializes cluster master node:
-kubeadm init --apiserver-advertise-address $(hostname -i)
+kubeadm init --apiserver-advertise-address $(hostname -i) \
+--ignore-preflight-errors="all"
 
 # 2. Initialize cluster networking:
 
