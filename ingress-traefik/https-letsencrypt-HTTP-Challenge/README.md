@@ -10,6 +10,9 @@ Also, if you are interested in learning the basics of LetsEncrypt, then the foll
 
 The presentation about this topic is [here](https://docs.google.com/presentation/d/1QhbUBi5yGuDw3f2O_7vIvSJM028bcH67wAmUOMWtD4c/edit?usp=sharing)
 
+
+# https://docs.traefik.io/v2.0/https/acme/  ---> Muhammad Asim
+
 # Setup Traefik with HTTPS through LetsEncrypt - using "HTTP Challenge"
 
 For this setup, you must own/have-access-to a public DNS domain name and it's related DNS server. The DNS names you have/will setup in that particular DNS zone will be used to access your services from the internet. This is also important for LetsEncrypt certification generation process. It is important for your Traefik proxy/load-balancer IP to be accessible from the internet, because the LetsEncrypt's HTTP Challenge will try to reach this IP to verify the HTTP Challenge. Therefore, the kubernetes cluster in this example is setup on a public infrastructure - Google Cloud. 
