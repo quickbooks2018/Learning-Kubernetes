@@ -353,6 +353,31 @@ Create the secret from the password file:
 $ kubectl  --namespace=kube-system  create secret generic secret-traefik-dashboard-users --from-file=dashboard-users.htpasswd 
 secret/secret-traefik-dashboard-users created
 ```
+######################################################################################################################################
+# Muhammad Asim Cloudflare
+# kubectl  --namespace=kube-system  create secret generic cloudflare-dns-secrets --from-file=/roo/.secrets/certbot/cloudflare.ini
+# kubectl describe secrets/cloudflare-dns-secrets -n kube-system
+
+
+bash-4.2# kubectl describe secrets/cloudflare-dns-secrets -n kube-system
+Name:         cloudflare-dns-secrets
+Namespace:    kube-system
+Labels:       <none>
+Annotations:  <none>
+
+Type:  Opaque
+
+Data
+====
+cloudflare.ini:  146 bytes
+
+
+###################################################################################################################################
+
+
+
+
+
 
 ### Verify that the configmap and secret objects exist in the `kube-system` namespace:
 ```
