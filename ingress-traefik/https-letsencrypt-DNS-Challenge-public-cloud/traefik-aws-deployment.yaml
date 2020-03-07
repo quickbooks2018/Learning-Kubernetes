@@ -69,6 +69,7 @@ spec:
         secret:
           # secret should be created manually from the dashboard-users.htpasswd file
           secretName: secret-traefik-dashboard-users
+          
       containers:
       - image: traefik:1.7
         name: traefik-ingress-controller
@@ -79,9 +80,17 @@ spec:
           containerPort: 443
         - name: webui
           containerPort: 8080
-        secret:
-            # secret should be created manually from the file ---> kubectl --namespace=kube-system create secret generic cloudflare-dns-secrets --from-file=/root/.secrets/certbot/cloudflare.ini
-            secretName: cloudflare-dns-secrets  
+        env:
+            - name: dns_cloudflare_email
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-dns-secrets
+                  key: dns_cloudflare_email
+            - name: dns_cloudflare_api_key
+                valueFrom:
+                  secretKeyRef:
+                    name: cloudflare-dns-secrets
+                    key: dns_cloudflare_api_key      
         
         volumeMounts:
         - mountPath: "/etc/traefik/"
