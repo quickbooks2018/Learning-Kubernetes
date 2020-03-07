@@ -333,6 +333,8 @@ $ kubectl --namespace=kube-system create secret generic secret-aws-dns-credentia
 ### Create a secret for Cloudflare DNS Credentials:
 
 ```
+vim create-cloudflare-secret.sh
+
 #!/bin/bash
 kubectl --namespace=kube-system create secret generic cloudflare-dns-secrets \
   --from-literal=dns_cloudflare_email="your-email-address" \
