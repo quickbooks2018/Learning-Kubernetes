@@ -37,7 +37,7 @@ spec:
 
 ---
 kind: Deployment
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 metadata:
   name: traefik-ingress-controller
   namespace: kube-system
@@ -69,7 +69,6 @@ spec:
         secret:
           # secret should be created manually from the dashboard-users.htpasswd file
           secretName: secret-traefik-dashboard-users
-          
       containers:
       - image: traefik:1.7
         name: traefik-ingress-controller
@@ -81,17 +80,16 @@ spec:
         - name: webui
           containerPort: 8080
         env:
-            - name: dns_cloudflare_email
-              valueFrom:
-                secretKeyRef:
-                  name: cloudflare-dns-secrets
-                  key: dns_cloudflare_email
-            - name: dns_cloudflare_api_key
-                valueFrom:
-                  secretKeyRef:
-                    name: cloudflare-dns-secrets
-                    key: dns_cloudflare_api_key      
-        
+          - name: dns_cloudflare_email
+            valueFrom:
+              secretKeyRef:
+                name: cloudflare-dns-secrets
+                key: dns_cloudflare_email
+          - name: dns_cloudflare_api_key
+            valueFrom:
+              secretKeyRef:
+                name: cloudflare-dns-secrets
+                key: dns_cloudflare_api_key
         volumeMounts:
         - mountPath: "/etc/traefik/"
           name: vol-traefik-toml-file
