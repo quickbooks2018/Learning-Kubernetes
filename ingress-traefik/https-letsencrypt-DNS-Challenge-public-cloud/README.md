@@ -330,8 +330,16 @@ $ kubectl --namespace=kube-system create secret generic secret-aws-dns-credentia
   --from-literal=AWS_HOSTED_ZONE_ID=Z1SVJKHSFGHRL7 \
   --from-literal=AWS_DEFAULT_REGION=eu-central-1
 ```
+### Create a secret for Cloudflare DNS Credentials:
 
+```
+#!/bin/bash
+kubectl --namespace=kube-system create secret generic cloudflare-dns-secrets \
+  --from-literal=dns_cloudflare_email="your-email-address" \
+  --from-literal=dns_cloudflare_api_key="your-akikey-from-cloudflare"
 
+#END
+```
 ### Create a secret for Traefik's dashboard users:
 First, create the password file, using the `htpasswd` utility on your local computer. If you don't have that on your local computer, there are many online (web-based) tools, which will create this file for you.
 
