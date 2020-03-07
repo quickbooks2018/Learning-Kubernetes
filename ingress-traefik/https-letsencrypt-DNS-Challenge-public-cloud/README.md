@@ -410,6 +410,7 @@ persistentvolumeclaim/pvc-traefik-acme-json created
 service/traefik-ingress-service created
 ```
 
+### ### Create Traefik deployment for AWS:
 Use the `traefik-aws-deployment.yaml` file which we updated in the section above.
 
 ```
