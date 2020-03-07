@@ -410,6 +410,13 @@ persistentvolumeclaim/pvc-traefik-acme-json created
 service/traefik-ingress-service created
 ```
 
+Use the `traefik-aws-deployment.yaml` file which we updated in the section above.
+
+```
+$ kubectl apply -f traefik-aws-deployment.yaml
+
+```
+
 ### Verify:
 
 ```
