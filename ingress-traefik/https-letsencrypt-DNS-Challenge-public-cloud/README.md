@@ -317,7 +317,10 @@ spec:
 $ kubectl  --namespace=kube-system  create configmap configmap-traefik-toml --from-file=traefik.toml
 configmap/configmap-traefik-toml created
 ```
+### Create a configmap for `traefik-cloudflare.toml`:
 
+kubectl  --namespace=kube-system  create configmap configmap-traefik-toml --from-file=traefik-cloudflare.toml
+configmap/configmap-traefik-toml created
 
 ### Create a secret for AWS DNS credentials:
 ```
