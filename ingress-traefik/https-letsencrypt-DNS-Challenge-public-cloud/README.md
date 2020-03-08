@@ -333,6 +333,9 @@ $ kubectl --namespace=kube-system create secret generic secret-aws-dns-credentia
 ### Create a secret for Cloudflare DNS Credentials:
 
 ```
+# https://go-acme.github.io/lego/dns/cloudflare/
+# https://docs.traefik.io/v2.0/https/acme/
+
 vim create-cloudflare-secret.sh
 
 #!/bin/bash
