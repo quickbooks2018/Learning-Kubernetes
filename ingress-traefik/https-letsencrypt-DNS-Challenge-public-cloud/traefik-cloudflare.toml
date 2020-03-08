@@ -42,8 +42,8 @@ acmeLogging = true
   [acme.dnsChallenge]
   provider = "cloudflare"
   [[acme.domains]]
-  
-    main = "*.domain.com"
+    main = "domain.com"
+    sans = ["*.domain.com"]
     
 
 # CA server to use.
