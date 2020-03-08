@@ -7,6 +7,7 @@
 # https://docs.traefik.io/v1.2/toml/
 
 # Environment Variables CloudFlare
+# https://go-acme.github.io/lego/dns/cloudflare/
 # https://stackoverflow.com/questions/49527163/configure-wildcard-certificates-with-traefik-and-lets-encrypt/49674358#49674358
 # https://stackoverflow.com/questions/56235169/setting-up-traefik-with-cloudflare
 
