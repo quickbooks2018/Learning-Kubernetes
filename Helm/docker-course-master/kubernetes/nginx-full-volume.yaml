@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      initContainers:
+        - name: nginx-github-clone
+          image: alpine/git
+          command: ['clone', 'https://github.com/gbaeke/static-web.git', '/usr/share/nginx/html']
+          volumeMounts:
+          - name: nginx-files
+            mountPath: /usr/share/nginx/html
+      containers:
+      - name: nginx
+        image: nginx:1.15.2
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-files
+          mountPath: /usr/share/nginx/html
+        resources:
+          requests:
+            cpu: 250m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+      volumes:
+        - name: nginx-files
+          emptyDir: {}

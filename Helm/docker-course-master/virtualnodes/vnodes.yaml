@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: resnet
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 5001
+  selector:
+    app: resnet
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resnet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resnet
+  template:
+    metadata:
+      labels:
+        app: resnet
+    spec:
+      containers:
+      - name: onnxresnet50v2
+        image: gbaeke/onnxresnet50v2
+        ports:
+        - containerPort: 5001
+        resources:
+          requests:
+            cpu: 1
+          limits:
+            cpu: 1
+      nodeSelector:
+        kubernetes.io/role: agent
+        beta.kubernetes.io/os: linux
+        type: virtual-kubelet
+      tolerations:
+      - key: virtual-kubelet.io/provider
+        operator: Exists
+      - key: azure.com/aci
+        effect: NoSchedule

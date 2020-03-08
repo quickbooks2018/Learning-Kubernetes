@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: tls-nginx
+spec:
+  tls:
+  - hosts:
+    - web.137.117.232.246.xip.io
+    secretName: xip.io.tls
+  rules:
+    - host: web.137.117.232.246.xip.io
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: nginx
+            servicePort: 80
