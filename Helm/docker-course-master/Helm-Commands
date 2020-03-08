@@ -1,0 +1,73 @@
+1. snap install helm --classic
+
+2. choco install kubernetes-helm
+
+3. snap version
+
+4. https://helm.sh/docs/intro/install/
+
+5. Use Binary & Install 
+
+# https://github.com/helm/helm/releases
+
+6. https://helm.sh/docs/intro/install/
+
+7. helm help
+
+8. helm install --values --name
+
+9. helm fetch
+
+10. helm list
+
+11. heml status
+
+12. helm search
+
+13. helm repo update
+
+14. helm update
+
+15. helm rollback ---> go to previous deployment
+
+16. helm delete (--purge)
+
+17. helm reset (--force) ---> delete the tiller server
+
+#####################################################################
+
+# https://stackoverflow.com/questions/53403428/traefik-ingress-dashboard-return-404
+
+1. kubectl -n kube-system create serviceaccount tiller
+
+2. kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+
+3. kubectl get  clusterrolebinding tiller
+
+4. helm init --service-account tiller
+
+5. kubectl get pods -n kube-system
+
+6. helm help --shows all the commands
+
+7. helm home
+
+8. helm repo list
+
+9. helm list ---> shows the list, if you install anything with helm
+
+10. helm search jenkins ---> search for applications
+
+11. helm inspect stable/jenkins  ---> shows you inside jenkins
+
+12. helm help inspect
+
+13. helm fetch stable/jenkins
+
+14. kubectl -n kube-system get deploy,replicaset,pod,serviceaccount,clusterrolebinding | grep tiller
+
+15. helm help reset
+
+16. helm reset --force --remove-helm-home
+
+17. kubectl -n kube-system delete rs tiller-deploy-c8bf5f5f55f
