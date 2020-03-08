@@ -6,7 +6,7 @@
 # https://docs.traefik.io/v1.7/user-guide/examples/
 # https://docs.traefik.io/v1.2/toml/
 
-# Environment Variables CloudFlare ---> Not Working
+# Environment Variables CloudFlare
 # https://stackoverflow.com/questions/49527163/configure-wildcard-certificates-with-traefik-and-lets-encrypt/49674358#49674358
 # https://stackoverflow.com/questions/56235169/setting-up-traefik-with-cloudflare
 
