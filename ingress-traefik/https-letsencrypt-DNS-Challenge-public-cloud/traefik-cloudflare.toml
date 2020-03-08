@@ -1,4 +1,17 @@
 # https://stackoverflow.com/questions/49527163/configure-wildcard-certificates-with-traefik-and-lets-encrypt/49674358#49674358
+# https://github.com/containous/traefik/issues/5592
+# https://stackoverflow.com/questions/56235169/setting-up-traefik-with-cloudflare
+# https://certbot-dns-cloudflare.readthedocs.io/en/stable/index.html
+# https://community.cloudflare.com/t/fixed-docker-reverse-proxy-ssl-setup/50056
+# https://docs.traefik.io/v1.7/user-guide/examples/
+# https://docs.traefik.io/v1.2/toml/
+
+# Environment Variables CloudFlare
+# https://stackoverflow.com/questions/49527163/configure-wildcard-certificates-with-traefik-and-lets-encrypt/49674358#49674358
+# https://stackoverflow.com/questions/56235169/setting-up-traefik-with-cloudflare
+
+
+
 defaultEntryPoints = ["http", "https"]
 logLevel = "INFO"
 
