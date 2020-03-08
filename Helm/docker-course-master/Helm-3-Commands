@@ -1,0 +1,13 @@
+1. helm search repo jenkins
+
+2. helm repo update
+
+3. helm install jenkins stable/jenkins 
+
+4. helm list
+
+5. kubectl get all
+
+6. helm uninstall jenkins
+
+7. helm list
