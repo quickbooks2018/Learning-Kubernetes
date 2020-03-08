@@ -44,7 +44,7 @@
 
 3. kubectl get  clusterrolebinding tiller
 
-4. helm init --service-account tiller
+4. helm init --service-account tiller ---> https://helm.sh/docs/faq/#removal-of-tiller ---> Removal of Tiller
 
 5. kubectl get pods -n kube-system
 
