@@ -80,16 +80,16 @@ spec:
         - name: webui
           containerPort: 8080
         env:
-          - name: dns_cloudflare_email
+          - name: CLOUDFLARE_EMAIL
             valueFrom:
               secretKeyRef:
                 name: cloudflare-dns-secrets
-                key: dns_cloudflare_email
-          - name: dns_cloudflare_api_key
+                key: CLOUDFLARE_EMAIL
+          - name: CLOUDFLARE_API_KEY
             valueFrom:
               secretKeyRef:
                 name: cloudflare-dns-secrets
-                key: dns_cloudflare_api_key
+                key: CLOUDFLARE_API_KEY
         volumeMounts:
         - mountPath: "/etc/traefik/"
           name: vol-traefik-toml-file
