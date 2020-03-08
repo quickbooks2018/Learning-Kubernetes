@@ -11,3 +11,7 @@
 6. helm uninstall jenkins
 
 7. helm list
+
+8. helm repo add stable https://kubernetes-charts.storage.googleapis.com
+
+9. helm repo update
