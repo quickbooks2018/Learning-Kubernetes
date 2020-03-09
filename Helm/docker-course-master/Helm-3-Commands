@@ -15,3 +15,18 @@
 8. helm repo add stable https://kubernetes-charts.storage.googleapis.com
 
 9. helm repo update
+
+10. helm delete ---> helm uninstall
+
+11. helm inspect ---> helm show
+
+12. helm fetch  ---> helm pull
+
+13. --purge is now default (to override: helm uninstall --keep-history) by default uninstall command delete history
+
+14. helm init ---> is now removed
+
+15. helm 2to3 convert --dry-run croc-hunter
+
+16. --generate-name ---> Old Style Helm2 ---> auto-generated unless overridden ---> New Style helm3 ---> error unless auto-generation requested
+
