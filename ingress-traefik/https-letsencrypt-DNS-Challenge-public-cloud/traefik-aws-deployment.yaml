@@ -70,7 +70,7 @@ spec:
           # secret should be created manually from the dashboard-users.htpasswd file
           secretName: secret-traefik-dashboard-users
       containers:
-      - image: traefik:1.7
+      - image: traefik:1.7.20
         name: traefik-ingress-controller
         ports:
         - name: http
