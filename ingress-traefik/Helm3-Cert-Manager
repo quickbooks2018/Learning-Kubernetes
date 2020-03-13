@@ -1,0 +1,258 @@
+# Step 1
+
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+
+kubectl create ns traefik
+helm install traefik stable/traefik --namespace traefik --set kubernetes.ingressClass=traefik --set rbac.enabled=true --set fullnameOverride=traefik-ingress-controller --set kubernetes.ingressEndpoint.useDefaultPublishedService=true --version 1.85.0
+
+
+vim traefik-ingress-controller-rbac.yaml
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: traefik-ingress-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: traefik-ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik-ingress-controller
+subjects:
+- kind: ServiceAccount
+  name: traefik-ingress-controller
+  namespace: traefik
+
+ kubectl get svc -n traefik --watch
+
+
+
+ # Uninstall 
+helm list --all-namespaces
+helm uninstall traefik-ingress -n traefik
+
+ # Step 2
+
+
+# Configure the traefik ingress controller to use HTTPS
+# Use cert-manager to automate the management of the TLS certificate when configuring your traefik ingress controller to use HTTPS. Use helm to install the certmanager chart
+
+# Create the cert-manager namespace by going into your terminal and using kubectl.
+
+# https://avencera.com/learn/install-and-setup-cert-manager/
+
+# https://gist.github.com/praveenperera/8c9faee270d133035cab33ae67ab56c1
+
+kubectl create namespace cert-manager
+
+kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml --namespace cert-manager
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install cert-manager --namespace cert-manager --version v0.12.0 jetstack/cert-manager --set ingressShim.defaultIssuerName=letsencrypt --set ingressShim.defaultIssuerKind=ClusterIssuer
+
+kubectl -n cert-manager get all
+
+# Step 3
+
+# Create a Backend Service
+
+# 3a Backend Setup nginx as Web-Server ---> Setup Deployment + Service
+
+# vim nginx-backend.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.15.2
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 250m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+
+
+
+
+ kubectl apply -f nginx-backend.yaml 
+
+# 3b-1
+
+vim create-cloudflare-secret.sh
+
+#!/bin/bash
+kubectl --namespace=cert-manager create secret generic cloudflare-api-key \
+  --from-literal=api-key="your-akikey-from-cloudflare"
+
+#END
+
+chmod +x create-cloudflare-secret.sh
+
+./create-cloudflare-secret.sh
+
+kubectl get secrets -n cert-manager
+
+kubectl describe secret/cloudflare-api-key -n cert-manager
+
+
+# 3b-2
+
+vim prod_issuer.yaml
+
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: quickbooks2018@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - selector: {}
+        dns01:
+          cloudflare:
+            email: chasim1982@gmail.com
+            apiKeySecretRef:
+              name: cloudflare-api-key
+              key: api-key
+
+ 
+ kubectl apply -f prod_issuer.yaml --namespace=cert-manager
+
+ kubectl -n cert-manager get all
+
+ # 3b-3
+
+ kubectl get namespaces
+
+ vim certificate.yaml 
+
+ ---
+  apiVersion: cert-manager.io/v1alpha2
+  kind: Certificate
+  metadata:
+    name: saqlainmushtaq.com
+    namespace: cert-manager
+  spec:
+    secretName: cloudflare-api-key
+    issuerRef:
+      name: letsencrypt-prod
+      kind: ClusterIssuer
+    commonName: "*.saqlainmushtaq.com"
+    dnsNames:
+      - saqlainmushtaq.com
+      - "*.saqlainmushtaq.com"
+    acme:
+      config:
+        - dns01:
+            provider: cloudflare
+          domains:
+            - saqlainmushtaq.com
+            - "*.saqlainmushtaq.com"
+  
+
+
+kubectl create -f certificate.yaml 
+
+
+ # 3c  vim ingress.yaml
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx
+  annotations:
+   certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - nginx.saqlainmushtaq.com
+    secretName: saqlainmushtaq-com-tls
+  rules:
+    - host: nginx.saqlainmushtaq.com
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: nginx
+            servicePort: 80
+
+
+ kubectl apply -f ingress.yaml  -n traefik  
+ 
+ 
+ # Step 5
+
+kubectl -n traefik get all 
+
+kubectl get ingress -n traefik
+
+kubectl describe ingress/nginx -n traefik
+
+kubectl get svc -n traefik
+
+kubectl get certificates -n default
+
+kubectl describe certificates CERTIFICATENAME -n default
+
+kubectl get certificates --all-namespaces
+
+kubectl describe order
+
+# Logs  For Error
+kubectl get challenges --all-namespaces
+kubectl describe challenges/saqlainmushtaq.com-3372028327-2483165073-4023198301 -n cert-manager
